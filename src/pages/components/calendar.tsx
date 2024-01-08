@@ -1,18 +1,18 @@
-import styles from '@/styles/Calendar.module.css';
-import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+import styles from '@/styles/Calendar.module.css'
+import dayjs from 'dayjs'
+import React, { useEffect, useState } from 'react'
 
 // Import Day.js plugins
-const weekday = require('dayjs/plugin/weekday');
-const week_of_year = require('dayjs/plugin/weekOfYear');
-const utc = require('dayjs/plugin/utc');
-const array_support = require('dayjs/plugin/arraySupport');
+const weekday = require('dayjs/plugin/weekday')
+const week_of_year = require('dayjs/plugin/weekOfYear')
+const utc = require('dayjs/plugin/utc')
+const array_support = require('dayjs/plugin/arraySupport')
 
 // Extend Day.js with plugins
-dayjs.extend(utc);
-dayjs.extend(array_support);
-dayjs.extend(weekday);
-dayjs.extend(week_of_year);
+dayjs.extend(utc)
+dayjs.extend(array_support)
+dayjs.extend(weekday)
+dayjs.extend(week_of_year)
 
 // Constants
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Th', 'Fri', 'Sat', 'Sun']
@@ -29,8 +29,8 @@ export default function Calendar() {
 
   // useEffect hook to initialize the calendar when selectedMonth changes
   useEffect(() => {
-    initCalendar();
-  }, [selectedMonth]);
+    initCalendar()
+  }, [selectedMonth])
 
   // initialize the calendar
   function initCalendar() {
@@ -62,11 +62,11 @@ export default function Calendar() {
 
     // Add CSS classes based on conditions
     if (!day.isCurrentMonth) {
-      elementDayClassList.add('not_current_day');
+      elementDayClassList.add('not_current_day')
     }
 
     if (day.date === TODAY) {
-      elementDayClassList.add('today_calendar_day');
+      elementDayClassList.add('today_calendar_day')
     }
   }
 
@@ -74,15 +74,15 @@ export default function Calendar() {
   function initMonthSelectors() {
     document.getElementById('previous_month')?.addEventListener('click', function () {
       setSelectedMonth((prevMonth) => dayjs(prevMonth).subtract(1, 'month'));
-    });
+    })
 
     document.getElementById('current_month')?.addEventListener('click', function () {
       setSelectedMonth(dayjs(new Date(+INITIAL_YEAR, +INITIAL_MONTH - 1, 1)));
-    });
+    })
 
     document.getElementById('next_month')?.addEventListener('click', function () {
       setSelectedMonth((prevMonth) => dayjs(prevMonth).add(1, 'month'));
-    });
+    })
   }
 
   // useEffect hook to initialize month selectors and clean up event listeners
@@ -94,7 +94,7 @@ export default function Calendar() {
       document.getElementById('current_month')?.removeEventListener('click', handleCurrentMonthClick)
       document.getElementById('next_month')?.removeEventListener('click', handleNextMonthClick)
     };
-  }, []);
+  }, [])
   return (
     <>
       <div className = 'calendar'>
@@ -110,5 +110,5 @@ export default function Calendar() {
             <ol id = 'calendar_days' className = 'day_grid'></ol>
         </div>
     </>
-  );
+  )
 }
