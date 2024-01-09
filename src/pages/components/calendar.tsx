@@ -36,6 +36,20 @@ export default function Calendar() {
     initCalendar();
   }, [selectedMonth])
 
+   // Effect to log state after it has been updated
+  useEffect(() => {
+    console.log('Current month days:', currentMonthDays);
+  }, [currentMonthDays])
+
+  useEffect(() => {
+    console.log('Previous month days:', previousMonthDays);
+  }, [previousMonthDays])
+
+  useEffect(() => {
+    console.log('Next month days:', nextMonthDays);
+  }, [nextMonthDays])
+
+
   // Function to initialize the calendar
   function initCalendar() {
     //more console.logs
