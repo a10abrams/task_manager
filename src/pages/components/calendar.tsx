@@ -1,4 +1,3 @@
-import styles from '@/styles/calendar.module.css'
 import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
 import weekday from 'dayjs/plugin/weekday'
@@ -36,7 +35,7 @@ export default function Calendar() {
     initCalendar();
   }, [selectedMonth])
 
-   // Effect to log state after it has been updated
+  // Effect to log state after it has been updated
   useEffect(() => {
     console.log('Current month days:', currentMonthDays);
   }, [currentMonthDays])
@@ -49,10 +48,8 @@ export default function Calendar() {
     console.log('Next month days:', nextMonthDays);
   }, [nextMonthDays])
 
-
   // Function to initialize the calendar
   function initCalendar() {
-    //more console.logs
     console.log('Initializing calendar...')
     const year = selectedMonth.format('YYYY')
     const month = selectedMonth.format('M')
@@ -67,11 +64,15 @@ export default function Calendar() {
     setPreviousMonthDays(createPreviousMonthDays(year, month))
     setNextMonthDays(createNextMonthDays(year, month))
 
-    //Couple more console.logs
     console.log('Current month days:', currentMonthDays)
     console.log('Previous month days:', previousMonthDays)
     console.log('Next month days: ', nextMonthDays)
-    
+
+    //write one for previousMonthDays and nextMonthDays
+    currentMonthDays.forEach(day => {
+      appendDay(day, calendarDays);
+    });
+
     // Initialize month selector event handlers
     initMonthSelectors()
   }
