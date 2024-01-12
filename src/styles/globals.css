@@ -100,17 +100,18 @@ a {
 
 .calendar_container {
   position: relative;
-  display: grid;
+  /* display: grid; */
   border: solid 1px yellow;
-  height: 400px;
-  width: 400px;
+  /*height: 400px;*/
+  width: 600px;
+  overflow: hidden;
 }
 
-.calendar_grid_container {
+/*.calendar_grid_container {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-gap: 5px;
-}
+}*/
 
 .calendar_day {
     padding: 0;
@@ -121,7 +122,6 @@ a {
 
   
 .calendar_month_header {
-   
     background-color: #fff;
     padding: 10px;
     grid-column: 1;
@@ -148,21 +148,26 @@ a {
 }
   
 .day_of_week {
-    color: yellow;
-    font-size: 18px;
-    background-color: #fff;
-    padding-bottom: 5px;
-    padding-top: 10px;
+  /*display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  height: 40px; */
+  padding: 10px;
+  background-color: #fff;
+  color: black;
+  font-size: 18px;
+  /* border-bottom: 1px solid gray; */
+  list-style-type: none;
     
 }
-  
+
+.day_of_week > li {
+  text-align: center;
+}
+
 #days_of_week,
 .day_grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    height: 40px;
-    width: 40px;
-    
 }
   
 .day_of_week > * {
@@ -170,12 +175,14 @@ a {
     padding-right: 5px;
 }
   
-.day_grid {
-    height: 100%;
-    position: relative;
-    grid-column-gap: var(--grid-gap);
-    grid-row-gap: var(--grid-gap);
-    border-top: solid 1px var(--grey-200);
+li.day_grid {
+  border-top: 1px solid gray;
+  border-left: 0.2px solid gray;
+  padding: 10px;
+}
+
+li.day_grid.not_current_day {
+  color: black;opacity: 0.4;
 }
   
 #calendar_days {
@@ -183,11 +190,12 @@ a {
     min-height: 100px;
     font-size: 16px;
     background-color: #fff;
-    color: var(--grey-800);
+    width: auto;
     padding: 5px;
+    color: black;
 }
   
-.calendar_days > span {
+#calendar_days > span {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -206,8 +214,7 @@ a {
 }
   
 .today_calendar_day> span {
-    color: #fff;
+    color: green;
     border-radius: 9999px;
     background-color: var(--grey-800);
 }
-  
