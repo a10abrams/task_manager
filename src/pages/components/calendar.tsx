@@ -21,6 +21,12 @@ const TODAY = dayjs().format('YYYY-MM-DD')
 const INITIAL_YEAR = dayjs().format('YYYY')
 const INITIAL_MONTH = dayjs().format('MM')
 
+// Sample events data -- changing it to top of file fixed ts2304
+const eventsData = [
+  {date: '2024-01-26', title: 'Birthday'},
+  {date: '2024-01-31', title: 'Party'}
+]
+
 // Main Calendar component
 export default function Calendar() {
   console.log('Calendar component rendered')
@@ -66,33 +72,73 @@ export default function Calendar() {
     const calendarDays = document.getElementById('calendar_days')
     document.getElementById('selected_month')!.innerText = selectedMonth.format('MMMM YYYY')
 
-    removeAllDayElements(calendarDays)
-
-    // Append days for previous month
-    previousMonthDays.forEach(day => {
-      appendDay(day, calendarDays)
-    })
-
-    // Append days for current month
-    currentMonthDays.forEach(day => {
-      appendDay(day, calendarDays)
-    })
-
-    // Append days for next month
-    nextMonthDays.forEach(day => {
-      appendDay(day, calendarDays)
-    })
+    // Only update the necessary days
+    updateDays(calendarDays, previousMonthDays);
+    updateDays(calendarDays, currentMonthDays);
+    updateDays(calendarDays, nextMonthDays);
   }, [currentMonthDays, previousMonthDays, nextMonthDays]);
+
+    // Function to update days
+    function updateDays(calendarDays, days) {
+      days.forEach(day => {
+        const existingDay = calendarDays.querySelector(`[data-date="${day.date}"]`);
+        if (existingDay) {
+          // Update existing day
+          updateDay(existingDay, day);
+        } else {
+          // Append new day
+          appendDay(day, calendarDays);
+        }
+      });
+    }
 
   // Function to append a day to the calendar
   function appendDay(day, calendarDays) {
-    const elementDay = document.createElement('li')
-    const elementDayClassList = elementDay.classList
-    elementDayClassList.add('day_grid')
-    const dayOfMonthElement = document.createElement('span')
+    const elementDay = document.createElement('li');
+    elementDay.dataset.date = day.date;
+    const elementDayClassList = elementDay.classList;
+    elementDayClassList.add('day_grid');
+    const dayOfMonthElement = document.createElement('span');
+    dayOfMonthElement.innerText = day.dayOfMonth;
+    elementDay.appendChild(dayOfMonthElement);
+    calendarDays.appendChild(elementDay);
+  
+    if (!day.isCurrentMonth) {
+      elementDayClassList.add('not_current_day');
+    }
+  
+    if (day.date === TODAY) {
+      elementDayClassList.add('today_calendar_day');
+    }
+  
+    // Render events for the day
+    const eventsForDay = getEventsForDay(day.date);
+    eventsForDay.forEach(event => {
+      const eventElement = document.createElement('div');
+      eventElement.innerText = event.title;
+      eventElement.classList.add('event');
+      elementDay.appendChild(eventElement);
+    });
+  }
+
+  function updateDay(existingDay, day) {
+    const dayOfMonthElement = existingDay.querySelector('span')
     dayOfMonthElement.innerText = day.dayOfMonth
-    elementDay.appendChild(dayOfMonthElement)
-    calendarDays.appendChild(elementDay)
+
+    // Remove existing events
+    existingDay.querySelectorAll('.event').forEach(eventElement => eventElement.remove())
+
+    //Render events for the day
+    const eventsForDay = getEventsForDay(day.date)
+    eventsForDay.forEach(event => {
+      const eventElement = document.createElement('div')
+      eventElement.innerText = event.title
+      eventElement.classList.add('event')
+      existingDay.appendChild(eventElement)
+    })
+
+    const elementDayClassList = existingDay.classList
+    elementDayClassList.remove('not_current_day', 'today_calendar_day')
 
     if (!day.isCurrentMonth) {
       elementDayClassList.add('not_current_day')
@@ -103,6 +149,10 @@ export default function Calendar() {
     }
   }
 
+  function getEventsForDay(date) {
+    return eventsData.filter(event => event.date === date)
+  }
+  
   // Effect to initialize month selector event handlers and clean up
   useEffect(() => {
     return () => {
@@ -129,19 +179,30 @@ export default function Calendar() {
 
   // Function to initialize month selector event handlers
   function initMonthSelectors() {
-    document.getElementById('previous_month')?.addEventListener('click', handlePreviousMonthClick)
-    document.getElementById('current_month')?.addEventListener('click', handleCurrentMonthClick)
-    document.getElementById('next_month')?.addEventListener('click', handleNextMonthClick)
+    document.getElementById('previous_month')?.addEventListener('click', handlePreviousMonthClick);
+    document.getElementById('current_month')?.addEventListener('click', handleCurrentMonthClick);
+    document.getElementById('next_month')?.addEventListener('click', handleNextMonthClick);
   }
 
   // Function to render the days of the month; should fix days sometimes not showing--double fixed for nextMonthDays
   function renderDaysOfMonth() {
     const allYearDays = [...previousMonthDays, ...currentMonthDays, ...nextMonthDays]
 
+    //Array to store events for each day
+    const eventInformation = []
+
+    allYearDays.forEach((day) => {
+      const eventsForDay = eventsData.filter((event) => event.date === day.date)
+      eventInformation.push({date: day.date, events: eventsForDay})
+    })
+
     return allYearDays.map((day, index) => (
       //"index" has to be the "key" prop in order to manipulate the dom 
       <li key={index} className={`day_grid ${!day.isCurrentMonth ? 'not_current_day' : ''} ${day.date === TODAY ? 'today_calendar_day' : ''}`}>
         <span>{day.dayOfMonth}</span>
+        {eventInformation[index].events.map((event, eventIndex) => (
+          <div key = {eventIndex} className = 'event'>{event.title}</div>
+        ))}
       </li>
     ));
   }
@@ -177,7 +238,7 @@ export default function Calendar() {
 
 // Utility function to remove all day elements from the calendar
 function removeAllDayElements(calendarDays) {
-  let first = calendarDays.firstElementChild
+  let first = calendarDays.firstElementChild;
 
   while (first) {
     first.remove();
@@ -187,8 +248,7 @@ function removeAllDayElements(calendarDays) {
 
 // Function to create an array of current month days
 function createCurrentMonthDays(year, month) {
-  const numberOfDaysInMonth = dayjs(`${year}-${month}-01`).daysInMonth()
-  // "_" is for unused variables; the value generated by `Array.from` is unnecessary so it's being ignored
+  const numberOfDaysInMonth = dayjs(`${year}-${month}-01`).daysInMonth();
   return Array.from({ length: numberOfDaysInMonth }, (_, index) => {
     const dayOfMonth = index + 1;
     return {
@@ -201,8 +261,8 @@ function createCurrentMonthDays(year, month) {
 
 // Function to create an array of previous month days
 function createPreviousMonthDays(year, month) {
-  const firstDayOfTheMonthWeekday = dayjs(`${year}-${month}-01`).day()
-  const previousMonth = dayjs(`${year}-${month}-01`).subtract(1, 'month')
+  const firstDayOfTheMonthWeekday = dayjs(`${year}-${month}-01`).day();
+  const previousMonth = dayjs(`${year}-${month}-01`).subtract(1, 'month');
 
   const visibleDaysOfPreviousMonth = firstDayOfTheMonthWeekday ? firstDayOfTheMonthWeekday - 1 : 6;
   const previousMonthFinalMonday = dayjs(`${year}-${month}-01`).subtract(visibleDaysOfPreviousMonth, 'day').date();
@@ -218,11 +278,11 @@ function createPreviousMonthDays(year, month) {
 
 // Function to create an array of next month days
 function createNextMonthDays(year, month) {
-  const lastDayOfMonth = dayjs(`${year}-${month}-01`).endOf('month')
-  const lastDayOfMonthWeekday = lastDayOfMonth.day()
-  const nextMonth = dayjs(`${year}-${month}-01`).add(1, 'month')
+  const lastDayOfMonth = dayjs(`${year}-${month}-01`).endOf('month');
+  const lastDayOfMonthWeekday = lastDayOfMonth.day();
+  const nextMonth = dayjs(`${year}-${month}-01`).add(1, 'month');
 
-  const visibleDaysOfNextMonth = lastDayOfMonthWeekday ? 7 - lastDayOfMonthWeekday : lastDayOfMonthWeekday
+  const visibleDaysOfNextMonth = lastDayOfMonthWeekday ? 7 - lastDayOfMonthWeekday : lastDayOfMonthWeekday;
 
   return Array.from({ length: visibleDaysOfNextMonth }, (_, index) => {
     return {
