@@ -15,6 +15,9 @@ dayjs.extend(utc);
 //@ts-ignore
 dayjs.extend(arraySupport);
 
+// Check if localStorage is available
+
+
 // Constants for weekdays, today's date, and initial year/month
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const TODAY = dayjs().format('YYYY-MM-DD');
@@ -26,6 +29,12 @@ const eventsData = [
   { date: '2024-01-26', title: 'Birthday' },
   { date: '2024-01-31', title: 'Party' },
 ];
+
+// Hoisted in order to solve ts2304
+function getEventsForDay(date) {
+  // `filter` creates an array of all elements that pass the test in updateDay
+  return eventsData.filter((event) => event.date === date);
+}
 
 // Day component
 const Day = ({ date, dayOfMonth, isCurrentMonth, today, events }) => {
@@ -49,6 +58,15 @@ const Day = ({ date, dayOfMonth, isCurrentMonth, today, events }) => {
 export default function Calendar() {
   console.log('Calendar component rendered');
 
+  // check if localStorage is available
+  const Calendar = () => {
+    const localStorageAvailable = typeof window !== 'undefined' && window.localStorage;
+  
+
+  // Use localStorage, otherwise use fallback
+  const storedEventsDataString = localStorageAvailable ? localStorage.getItem('eentsData') : null
+  }
+
   // Ref for selected_month; it holds a 'reference' to selected_month so that it can actually be accesible in the component; `useEffect` updates its content 
   const selectedMonthRef = useRef(null);
 
@@ -59,11 +77,6 @@ export default function Calendar() {
   const [currentMonthDays, setCurrentMonthDays] = useState([]);
   const [previousMonthDays, setPreviousMonthDays] = useState([]);
   const [nextMonthDays, setNextMonthDays] = useState([]);
-
-  // Effect to initialize the calendar when the selectedMonth changes
-  useEffect(() => {
-    initCalendar();
-  }, [selectedMonth]);
 
   // Effect to log state after it has been updated
   useEffect(() => {
@@ -83,8 +96,8 @@ export default function Calendar() {
     selectedMonthRef.current.innerText = selectedMonth.format('MMMM YYYY');
   }, [selectedMonth]);
 
-  // Function to initialize the calendar
-  function initCalendar() {
+  // Effect to initialize the calendar (instead of function)
+  useEffect(() => {
     console.log('Initializing calendar...');
     const year = selectedMonth.format('YYYY');
     const month = selectedMonth.format('M');
@@ -93,7 +106,7 @@ export default function Calendar() {
     setCurrentMonthDays(createCurrentMonthDays(year, month));
     setPreviousMonthDays(createPreviousMonthDays(year, month));
     setNextMonthDays(createNextMonthDays(year, month));
-  }
+  }, [selectedMonth])
 
   // Effect to re-render the calendar when the state is updated -- updated to use React components instead of manually manipulating DOM
   useEffect(() => {
@@ -107,6 +120,8 @@ export default function Calendar() {
       appendDay(day, calendarDays);
     });
   }
+
+
 
   // Function to append a day to the calendar
   function appendDay(day, calendarDays) {
@@ -123,37 +138,15 @@ export default function Calendar() {
   }
 
   function updateDay(existingDay, day) {
-    const dayOfMonthElement = existingDay.querySelector('span');
-    dayOfMonthElement.innerText = day.dayOfMonth;
+  // fixed direct DOM manipulation -- update state based on logic instead
+    const updatedCurrentMonthDays = currentMonthDays.map((currentDay) =>
+      currentDay.date === day.date ? {...currentDay, events: getEventsForDay(day.date)} : currentDay
+      );
 
-    existingDay.querySelectorAll('.event').forEach((eventElement) => eventElement.remove());
-
-    // Render events for day
-    const eventsForDay = getEventsForDay(day.date);
-    eventsForDay.forEach((event) => {
-      const eventElement = document.createElement('div');
-      eventElement.innerText = event.title;
-      eventElement.classList.add('event');
-      existingDay.appendChild(eventElement);
-    });
-
-    // Update CSS classes based on month + today
-    const elementDayClassList = existingDay.classList;
-    elementDayClassList.remove('not_current_day', 'today_calendar_day');
-
-    if (!day.isCurrentMonth) {
-      elementDayClassList.add('not_current_day');
-    }
-
-    if (day.date === TODAY) {
-      elementDayClassList.add('today_calendar_day');
-    }
+    setCurrentMonthDays(updatedCurrentMonthDays);
   }
 
-  function getEventsForDay(date) {
-    // `filter` creates an array of all elements that pass the test in updateDay
-    return eventsData.filter((event) => event.date === date);
-  }
+
 
   // Effect to initialize month selector event handlers and clean up
   useEffect(() => {
@@ -202,6 +195,57 @@ export default function Calendar() {
       />
     ));
   }
+  
+  // Event handling logic
+
+  const observancesData = [
+    // New Year's Day
+    { date: '2024-01-01', title: 'New Year&apos;s Day' },
+    // Birthday of Dr. Martin Luther King, Jr
+    { date: '2024-01-15', title: 'Martin Luther King, Jr. Day' },
+    // Washington's Birthday
+    { date: '2024-01-19', title: 'Washington&apos;s Birthday' },
+    // Valentine's Day
+    { date: '2024-02-14', title: 'Valentine&apos;s Day' },
+    // Earth Day
+    { date: '2024-04-22', title: 'Earth Day' },
+    // Memorial Day
+    { date: '2024-05-27', title: 'Memorial Day' },
+    // Juneteenth
+    { date: '2024-06-19', title: 'Juneteenth'},
+    // Independence Day
+    {date: '2024-07-04', title: 'Independence Day'},
+    // Labor Day
+    { date: '2024-09-02', title: 'Labor Day'},
+    // Indigenous People's Day
+    { date: '2024-10-14', title: 'Indigenous People&apos;s Day'},
+    // Veteran's Day
+    { date: '2024-11-11', title: 'Veteran&amp;s Day'},
+    //Thanksgiving Day
+    { date: '2024-11-28', title: 'Thanksgiving Day'},
+    // Christmas Day
+    { date: '2024-12-25', title: 'Christmas Day'}
+  ]
+  // Using local storage for data handling ; fix ts(2769) -- make sure storedEventsData is not null + parse the JSON string to convert it into an array
+  const storedEventsDataString = localStorage.getItem('eventsData')
+  const storedEventsData = storedEventsDataString ? JSON.parse(storedEventsDataString) : []
+
+  const fullCalendarEventData = observancesData.concat(storedEventsData)
+
+  const initEventsData = () => {
+    //ensures if storedEventsData is falsy or empty, observancesData returns
+    if(!storedEventsData || storedEventsData.length === 0) {
+      return observancesData;
+    } else {
+      return fullCalendarEventData;
+    }
+  }
+
+  const handleAddEvent = (newEvent) => {
+    const updatedEventsData = [...fullCalendarEventData, newEvent]
+
+    localStorage.setItem('eventsData', JSON.stringify(updatedEventsData));
+  }
 
   // JSX structure for the Calendar component
   return (
@@ -236,15 +280,18 @@ export default function Calendar() {
   );
 }
 
-// Function to create an array of current month days
+// Function to create an array of current month days -- updated to be dynamically rendered
 function createCurrentMonthDays(year, month) {
   const numberOfDaysInMonth = dayjs(`${year}-${month}-01`).daysInMonth();
   return Array.from({ length: numberOfDaysInMonth }, (_, index) => {
     const dayOfMonth = index + 1;
+    const date = dayjs(`${year}-${month}-${dayOfMonth}`).format('YYYY-MM-DD');
+
     return {
-      date: dayjs(`${year}-${month}-${dayOfMonth}`).format('YYYY-MM-DD'),
+      date,
       dayOfMonth,
       isCurrentMonth: true,
+      events: getEventsForDay(date)
     };
   });
 }
