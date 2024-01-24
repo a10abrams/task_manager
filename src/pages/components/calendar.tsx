@@ -4,6 +4,7 @@ import weekday from 'dayjs/plugin/weekday';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
 import utc from 'dayjs/plugin/utc';
 import arraySupport from 'dayjs/plugin/arraySupport';
+import EventsForm from './eventsForm'
 
 // Extending dayjs with required plugins
 //@ts-ignore
@@ -14,9 +15,6 @@ dayjs.extend(weekOfYear);
 dayjs.extend(utc);
 //@ts-ignore
 dayjs.extend(arraySupport);
-
-// Check if localStorage is available
-
 
 // Constants for weekdays, today's date, and initial year/month
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -30,9 +28,39 @@ const eventsData = [
   { date: '2024-01-31', title: 'Party' },
 ];
 
+// Hoisted recently
+const observancesData = [
+  // New Year's Day
+  { date: '2024-01-01', title: 'New Year&apos;s Day' },
+  // Birthday of Dr. Martin Luther King, Jr
+  { date: '2024-01-15', title: 'Martin Luther King, Jr. Day' },
+  // Washington's Birthday
+  { date: '2024-01-19', title: 'Washington&apos;s Birthday' },
+  // Valentine's Day
+  { date: '2024-02-14', title: 'Valentine&apos;s Day' },
+  // Earth Day
+  { date: '2024-04-22', title: 'Earth Day' },
+  // Memorial Day
+  { date: '2024-05-27', title: 'Memorial Day' },
+  // Juneteenth
+  { date: '2024-06-19', title: 'Juneteenth' },
+  // Independence Day
+  { date: '2024-07-04', title: 'Independence Day' },
+  // Labor Day
+  { date: '2024-09-02', title: 'Labor Day' },
+  // Indigenous People's Day
+  { date: '2024-10-14', title: 'Indigenous People&apos;s Day' },
+  // Veteran's Day
+  { date: '2024-11-11', title: 'Veteran&amp;s Day' },
+  // Thanksgiving Day
+  { date: '2024-11-28', title: 'Thanksgiving Day' },
+  // Christmas Day
+  { date: '2024-12-25', title: 'Christmas Day' },
+];
+
 // Hoisted in order to solve ts2304
 function getEventsForDay(date) {
-  // `filter` creates an array of all elements that pass the test in updateDay
+  // `filter` creates an array of all elements that pass the test
   return eventsData.filter((event) => event.date === date);
 }
 
@@ -55,20 +83,8 @@ const Day = ({ date, dayOfMonth, isCurrentMonth, today, events }) => {
 };
 
 // Main Calendar component
-export default function Calendar() {
+const Calendar = () => {
   console.log('Calendar component rendered');
-
-  // check if localStorage is available
-  const Calendar = () => {
-    const localStorageAvailable = typeof window !== 'undefined' && window.localStorage;
-  
-
-  // Use localStorage, otherwise use fallback
-  const storedEventsDataString = localStorageAvailable ? localStorage.getItem('eentsData') : null
-  }
-
-  // Ref for selected_month; it holds a 'reference' to selected_month so that it can actually be accesible in the component; `useEffect` updates its content 
-  const selectedMonthRef = useRef(null);
 
   // State variables for selected month and days of the month
   const [selectedMonth, setSelectedMonth] = useState(
@@ -77,6 +93,24 @@ export default function Calendar() {
   const [currentMonthDays, setCurrentMonthDays] = useState([]);
   const [previousMonthDays, setPreviousMonthDays] = useState([]);
   const [nextMonthDays, setNextMonthDays] = useState([]);
+
+  // Ref for selected_month; it holds a 'reference' to selected_month so that it can actually be accessible in the component; `useEffect` updates its content 
+  const selectedMonthRef = useRef(null);
+
+  // Event handler for clicking the previous month button
+  function handlePreviousMonthClick() {
+    setSelectedMonth((prevMonth) => dayjs(prevMonth).subtract(1, 'month'));
+  }
+
+  // Event handler for clicking the current month button
+  function handleCurrentMonthClick() {
+    setSelectedMonth(dayjs(new Date(+INITIAL_YEAR, +INITIAL_MONTH - 1, 1)));
+  }
+
+  // Event handler for clicking the next month button
+  function handleNextMonthClick() {
+    setSelectedMonth((prevMonth) => dayjs(prevMonth).add(1, 'month'));
+  }
 
   // Effect to log state after it has been updated
   useEffect(() => {
@@ -113,70 +147,39 @@ export default function Calendar() {
     console.log('Re-rendering calendar...');
   }, [currentMonthDays, previousMonthDays, nextMonthDays]);
 
-  // Function to update days
-  function updateDays(calendarDays, days) {
-    calendarDays.innerHTML = '';
-    days.forEach((day) => {
-      appendDay(day, calendarDays);
-    });
-  }
-
-
-
-  // Function to append a day to the calendar
-  function appendDay(day, calendarDays) {
-    calendarDays.appendChild(
-      <Day
-        key={day.date}
-        date={day.date}
-        dayOfMonth={day.dayOfMonth}
-        isCurrentMonth={day.isCurrentMonth}
-        today={TODAY}
-        events={getEventsForDay(day.date)}
-      />
-    );
-  }
-
-  function updateDay(existingDay, day) {
-  // fixed direct DOM manipulation -- update state based on logic instead
-    const updatedCurrentMonthDays = currentMonthDays.map((currentDay) =>
-      currentDay.date === day.date ? {...currentDay, events: getEventsForDay(day.date)} : currentDay
-      );
-
-    setCurrentMonthDays(updatedCurrentMonthDays);
-  }
-
-
-
-  // Effect to initialize month selector event handlers and clean up
+  // `localStorage`, as opposed to `sessionStorage`, has no expiration time; it's being used here to locally save and retrieve events for users acrosss sessions/refreshes
   useEffect(() => {
-    return () => {
-      document.getElementById('previous_month')?.removeEventListener('click', handlePreviousMonthClick);
-      document.getElementById('current_month')?.removeEventListener('click', handleCurrentMonthClick);
-      document.getElementById('next_month')?.removeEventListener('click', handleNextMonthClick);
-    };
-  }, []);
+    // Check if localStorage is available (only run in the browser environment)
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const storedEventsData = getEventsFromLocalStorage()
 
-  // Event handler for clicking the previous month button
-  function handlePreviousMonthClick() {
-    setSelectedMonth((prevMonth) => dayjs(prevMonth).subtract(1, 'month'));
-  }
+      const fullCalendarEventData = observancesData.concat(storedEventsData);
 
-  // Event handler for clicking the current month button
-  function handleCurrentMonthClick() {
-    setSelectedMonth(dayjs(new Date(+INITIAL_YEAR, +INITIAL_MONTH - 1, 1)));
-  }
+      const initEventsData = () => {
+        // ensures if storedEventsData is falsy or empty, observancesData returns
+        if (!storedEventsData || storedEventsData.length === 0) {
+          return observancesData;
+        } else {
+          return fullCalendarEventData;
+        }
+      };
 
-  // Event handler for clicking the next month button
-  function handleNextMonthClick() {
-    setSelectedMonth((prevMonth) => dayjs(prevMonth).add(1, 'month'));
-  }
+      // Log the initial events data
+      console.log('Initial events data:', initEventsData());
 
-  // Function to initialize month selector event handlers
-  function initMonthSelectors() {
-    document.getElementById('previous_month')?.addEventListener('click', handlePreviousMonthClick);
-    document.getElementById('current_month')?.addEventListener('click', handleCurrentMonthClick);
-    document.getElementById('next_month')?.addEventListener('click', handleNextMonthClick);
+     // addEvent, updateEvent, deleteEvent functions here
+
+    }
+  }, []); // Empty dependency array ensures this runs only once when rendered
+
+  const getEventsFromLocalStorage = () => {
+    // Check if localStorage is available
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const storedEventsDataString = localStorage.getItem('eventsData')
+      const storedEventsData = storedEventsDataString ? JSON.parse(storedEventsDataString) : [];
+      return storedEventsData
+    }
+    return [];
   }
 
   // Function to render the days of the month; should fix days sometimes not showing--double fixed for nextMonthDays
@@ -194,57 +197,6 @@ export default function Calendar() {
         events={getEventsForDay(day.date)}
       />
     ));
-  }
-  
-  // Event handling logic
-
-  const observancesData = [
-    // New Year's Day
-    { date: '2024-01-01', title: 'New Year&apos;s Day' },
-    // Birthday of Dr. Martin Luther King, Jr
-    { date: '2024-01-15', title: 'Martin Luther King, Jr. Day' },
-    // Washington's Birthday
-    { date: '2024-01-19', title: 'Washington&apos;s Birthday' },
-    // Valentine's Day
-    { date: '2024-02-14', title: 'Valentine&apos;s Day' },
-    // Earth Day
-    { date: '2024-04-22', title: 'Earth Day' },
-    // Memorial Day
-    { date: '2024-05-27', title: 'Memorial Day' },
-    // Juneteenth
-    { date: '2024-06-19', title: 'Juneteenth'},
-    // Independence Day
-    {date: '2024-07-04', title: 'Independence Day'},
-    // Labor Day
-    { date: '2024-09-02', title: 'Labor Day'},
-    // Indigenous People's Day
-    { date: '2024-10-14', title: 'Indigenous People&apos;s Day'},
-    // Veteran's Day
-    { date: '2024-11-11', title: 'Veteran&amp;s Day'},
-    //Thanksgiving Day
-    { date: '2024-11-28', title: 'Thanksgiving Day'},
-    // Christmas Day
-    { date: '2024-12-25', title: 'Christmas Day'}
-  ]
-  // Using local storage for data handling ; fix ts(2769) -- make sure storedEventsData is not null + parse the JSON string to convert it into an array
-  const storedEventsDataString = localStorage.getItem('eventsData')
-  const storedEventsData = storedEventsDataString ? JSON.parse(storedEventsDataString) : []
-
-  const fullCalendarEventData = observancesData.concat(storedEventsData)
-
-  const initEventsData = () => {
-    //ensures if storedEventsData is falsy or empty, observancesData returns
-    if(!storedEventsData || storedEventsData.length === 0) {
-      return observancesData;
-    } else {
-      return fullCalendarEventData;
-    }
-  }
-
-  const handleAddEvent = (newEvent) => {
-    const updatedEventsData = [...fullCalendarEventData, newEvent]
-
-    localStorage.setItem('eventsData', JSON.stringify(updatedEventsData));
   }
 
   // JSX structure for the Calendar component
@@ -276,9 +228,12 @@ export default function Calendar() {
           </ol>
         </div>
       </div>
+      <div id="form_container">
+        <EventsForm />
+      </div>
     </>
   );
-}
+};
 
 // Function to create an array of current month days -- updated to be dynamically rendered
 function createCurrentMonthDays(year, month) {
@@ -329,3 +284,5 @@ function createNextMonthDays(year, month) {
     };
   });
 }
+
+export default Calendar;
