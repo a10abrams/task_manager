@@ -194,3 +194,31 @@ li.day_grid.not_current_day {
   font-size: small;
   color: red;
 }
+
+/* EVENTS FORM */
+
+#form_container {
+  margin: auto;
+  padding-top: 3em;
+}
+
+.form_title {
+  margin-bottom: 2em;
+}
+
+.task_table {
+  margin: 1em;
+  border: 1px solid yellow;
+  overflow-y: auto;
+}
+
+.input_form_container {
+  margin-top: 2em;
+}
+
+.plus_new_event {
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+  display: block;
+}
