@@ -1,10 +1,12 @@
-import dayjs from 'dayjs';
-import React, { useEffect, useRef, useState } from 'react';
-import weekday from 'dayjs/plugin/weekday';
-import weekOfYear from 'dayjs/plugin/weekOfYear';
-import utc from 'dayjs/plugin/utc';
-import arraySupport from 'dayjs/plugin/arraySupport';
-import EventsForm from './eventsForm'
+import dayjs from "dayjs";
+import React, { useEffect, useRef, useState } from "react";
+import weekday from "dayjs/plugin/weekday";
+import weekOfYear from "dayjs/plugin/weekOfYear";
+import utc from "dayjs/plugin/utc";
+import arraySupport from "dayjs/plugin/arraySupport";
+import EventsForm from "./eventsForm";
+import { getEventsFromLocalStorage } from "../utilities/localStorageUtils";
+import Day from "./Day";
 
 // Extending dayjs with required plugins
 //@ts-ignore
@@ -16,77 +18,48 @@ dayjs.extend(utc);
 //@ts-ignore
 dayjs.extend(arraySupport);
 
-// Constants for weekdays, today's date, and initial year/month
-const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const TODAY = dayjs().format('YYYY-MM-DD');
-const INITIAL_YEAR = dayjs().format('YYYY');
-const INITIAL_MONTH = dayjs().format('MM');
-
-// Sample events data -- changing it to top of file fixed ts2304
-const eventsData = [
-  { date: '2024-01-26', title: 'Birthday' },
-  { date: '2024-01-31', title: 'Party' },
-];
+// Constants for weekdays, today"s date, and initial year/month
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const TODAY = dayjs().format("YYYY-MM-DD");
+const INITIAL_YEAR = dayjs().format("YYYY");
+const INITIAL_MONTH = dayjs().format("MM");
 
 // Hoisted recently
 const observancesData = [
   // New Year's Day
-  { date: '2024-01-01', title: 'New Year&apos;s Day' },
+  { date: "2024-01-01", title: "New Year&apos;s Day", id : "newYears" },
   // Birthday of Dr. Martin Luther King, Jr
-  { date: '2024-01-15', title: 'Martin Luther King, Jr. Day' },
+  { date: "2024-01-15", title: "Martin Luther King, Jr. Day", id : "mlkDay" },
   // Washington's Birthday
-  { date: '2024-01-19', title: 'Washington&apos;s Birthday' },
+  { date: "2024-01-19", title: "Washington&apos;s Birthday", id : "washBirth" },
   // Valentine's Day
-  { date: '2024-02-14', title: 'Valentine&apos;s Day' },
+  { date: "2024-02-14", title: "Valentine&apos;s Day", id : "valDay" },
   // Earth Day
-  { date: '2024-04-22', title: 'Earth Day' },
+  { date: "2024-04-22", title: "Earth Day", id : "earthDay" },
   // Memorial Day
-  { date: '2024-05-27', title: 'Memorial Day' },
+  { date: "2024-05-27", title: "Memorial Day", id : "memDay" },
   // Juneteenth
-  { date: '2024-06-19', title: 'Juneteenth' },
+  { date: "2024-06-19", title: "Juneteenth", id : "june19"},
   // Independence Day
-  { date: '2024-07-04', title: 'Independence Day' },
+  {date: "2024-07-04", title: "Independence Day", id : "july4"},
   // Labor Day
-  { date: '2024-09-02', title: 'Labor Day' },
+  { date: "2024-09-02", title: "Labor Day", id : "labDay"},
   // Indigenous People's Day
-  { date: '2024-10-14', title: 'Indigenous People&apos;s Day' },
+  { date: "2024-10-14", title: "Indigenous People&apos;s Day", id : "secondMon"},
   // Veteran's Day
-  { date: '2024-11-11', title: 'Veteran&amp;s Day' },
-  // Thanksgiving Day
-  { date: '2024-11-28', title: 'Thanksgiving Day' },
+  { date: "2024-11-11", title: "Veteran&amp;s Day", id : "vetDay" },
+  //Thanksgiving Day
+  { date: "2024-11-28", title: "Thanksgiving Day", id : "thxDay"},
+  //Halloween
+  { date: "2024-10-31", title: "Halloween", id : "halloween"},
   // Christmas Day
-  { date: '2024-12-25', title: 'Christmas Day' },
+  { date: "2024-12-25", title: "Christmas Day", id : "christmas"}
 ];
-
-// Hoisted in order to solve ts2304
-function getEventsForDay(date) {
-  // `filter` creates an array of all elements that pass the test
-  return eventsData.filter((event) => event.date === date);
-}
-
-// Day component
-const Day = ({ date, dayOfMonth, isCurrentMonth, today, events }) => {
-  const dayClasses = `day_grid ${!isCurrentMonth ? 'not_current_day' : ''} ${
-    date === today ? 'today_calendar_day' : ''
-  }`;
-
-  return (
-    <li className={dayClasses} data-date={date}>
-      <span>{dayOfMonth}</span>
-      {events.map((event, eventIndex) => (
-        <div key={eventIndex} className="event">
-          {event.title}
-        </div>
-      ))}
-    </li>
-  );
-};
 
 // Main Calendar component
 const Calendar = () => {
-  console.log('Calendar component rendered');
-
-  // State variables for selected month and days of the month
+  // State variables
+  const [allEvents, setAllEvents] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(
     dayjs(new Date(+INITIAL_YEAR, +INITIAL_MONTH - 1, 1))
   );
@@ -94,110 +67,85 @@ const Calendar = () => {
   const [previousMonthDays, setPreviousMonthDays] = useState([]);
   const [nextMonthDays, setNextMonthDays] = useState([]);
 
-  // Ref for selected_month; it holds a 'reference' to selected_month so that it can actually be accessible in the component; `useEffect` updates its content 
+  console.log("Calendar component rendered");
+
+  // Ref for selected_month
   const selectedMonthRef = useRef(null);
 
-  // Event handler for clicking the previous month button
+  // Event handlers
   function handlePreviousMonthClick() {
-    setSelectedMonth((prevMonth) => dayjs(prevMonth).subtract(1, 'month'));
+    setSelectedMonth((prevMonth) => dayjs(prevMonth).subtract(1, "month"));
   }
 
-  // Event handler for clicking the current month button
   function handleCurrentMonthClick() {
     setSelectedMonth(dayjs(new Date(+INITIAL_YEAR, +INITIAL_MONTH - 1, 1)));
   }
 
-  // Event handler for clicking the next month button
   function handleNextMonthClick() {
-    setSelectedMonth((prevMonth) => dayjs(prevMonth).add(1, 'month'));
+    setSelectedMonth((prevMonth) => dayjs(prevMonth).add(1, "month"));
   }
-
-  // Effect to log state after it has been updated
-  useEffect(() => {
-    console.log('Current month days:', currentMonthDays);
-  }, [currentMonthDays]);
-
-  useEffect(() => {
-    console.log('Previous month days:', previousMonthDays);
-  }, [previousMonthDays]);
-
-  useEffect(() => {
-    console.log('Next month days:', nextMonthDays);
-  }, [nextMonthDays]);
 
   // Effect to update selected_month text when selectedMonth changes
   useEffect(() => {
-    selectedMonthRef.current.innerText = selectedMonth.format('MMMM YYYY');
+    selectedMonthRef.current.innerText = selectedMonth.format("MMMM YYYY");
   }, [selectedMonth]);
 
-  // Effect to initialize the calendar (instead of function)
+  // Effect to initialize the calendar
   useEffect(() => {
-    console.log('Initializing calendar...');
-    const year = selectedMonth.format('YYYY');
-    const month = selectedMonth.format('M');
+    console.log("Initializing calendar...");
+    const year = selectedMonth.format("YYYY");
+    const month = selectedMonth.format("M");
 
     // Set the state for the current, previous, and next month days
-    setCurrentMonthDays(createCurrentMonthDays(year, month));
+    setCurrentMonthDays(createCurrentMonthDays(year, month, getEventsForDay));
     setPreviousMonthDays(createPreviousMonthDays(year, month));
     setNextMonthDays(createNextMonthDays(year, month));
-  }, [selectedMonth])
 
-  // Effect to re-render the calendar when the state is updated -- updated to use React components instead of manually manipulating DOM
+    // combine user events and obervances data
+    const allEventsData = [...observancesData, ...getEventsFromLocalStorage()];
+    setAllEvents(allEventsData);
+
+    // Log the initial events data
+    console.log("Initial events data:", allEventsData);
+  }, [selectedMonth]);
+
+  // Effect to re-render the calendar when the state is updated
   useEffect(() => {
-    console.log('Re-rendering calendar...');
+    console.log("Re-rendering calendar...");
   }, [currentMonthDays, previousMonthDays, nextMonthDays]);
 
-  // `localStorage`, as opposed to `sessionStorage`, has no expiration time; it's being used here to locally save and retrieve events for users acrosss sessions/refreshes
+  // Effect to fetch and update events from localStorage
   useEffect(() => {
-    // Check if localStorage is available (only run in the browser environment)
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const storedEventsData = getEventsFromLocalStorage()
+    const storedEventsData = getEventsFromLocalStorage();
+    setAllEvents(storedEventsData);
+  }, []);
 
-      const fullCalendarEventData = observancesData.concat(storedEventsData);
+  // Function to get events for a specific day
+  const getEventsForDay = (date) => {
+    // Combine user events and observances data
+    const events = [...allEvents, ...observancesData];
 
-      const initEventsData = () => {
-        // ensures if storedEventsData is falsy or empty, observancesData returns
-        if (!storedEventsData || storedEventsData.length === 0) {
-          return observancesData;
-        } else {
-          return fullCalendarEventData;
-        }
-      };
-
-      // Log the initial events data
-      console.log('Initial events data:', initEventsData());
-
-     // addEvent, updateEvent, deleteEvent functions here
-
-    }
-  }, []); // Empty dependency array ensures this runs only once when rendered
-
-  const getEventsFromLocalStorage = () => {
-    // Check if localStorage is available
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const storedEventsDataString = localStorage.getItem('eventsData')
-      const storedEventsData = storedEventsDataString ? JSON.parse(storedEventsDataString) : [];
-      return storedEventsData
-    }
-    return [];
+    // Filter events for the given date
+    return events.filter((event) => dayjs(event.date).isSame(date, "day"));
   }
 
-  // Function to render the days of the month; should fix days sometimes not showing--double fixed for nextMonthDays
-  function renderDaysOfMonth() {
-    // day component
-    const allYearDays = [...previousMonthDays, ...currentMonthDays, ...nextMonthDays];
+  // Function to render the days of the month
+function renderDaysOfMonth() {
+  const allYearDays = [...previousMonthDays, ...currentMonthDays, ...nextMonthDays];
 
-    return allYearDays.map((day) => (
-      <Day
-        key={day.date}
-        date={day.date}
-        dayOfMonth={day.dayOfMonth}
-        isCurrentMonth={day.isCurrentMonth}
-        today={TODAY}
-        events={getEventsForDay(day.date)}
-      />
-    ));
-  }
+  return allYearDays.map((day) => (
+    <Day
+      key={day.date}
+      date={day.date}
+      dayOfMonth={day.dayOfMonth}
+      isCurrentMonth={day.isCurrentMonth}
+      today={TODAY}
+      events={getEventsForDay(day.date)}
+      observancesData={observancesData}
+      allYearDays={allYearDays}
+    />
+  ));
+}
 
   // JSX structure for the Calendar component
   return (
@@ -223,7 +171,6 @@ const Calendar = () => {
             ))}
           </ol>
           <ol id="calendar_days" className="day_grid">
-            {/* This should fix the days not showing up sometimes */}
             {renderDaysOfMonth()}
           </ol>
         </div>
@@ -233,20 +180,20 @@ const Calendar = () => {
       </div>
     </>
   );
-};
 
 // Function to create an array of current month days -- updated to be dynamically rendered
-function createCurrentMonthDays(year, month) {
+function createCurrentMonthDays(year, month, getEventsForDay) {
   const numberOfDaysInMonth = dayjs(`${year}-${month}-01`).daysInMonth();
+
   return Array.from({ length: numberOfDaysInMonth }, (_, index) => {
-    const dayOfMonth = index + 1;
-    const date = dayjs(`${year}-${month}-${dayOfMonth}`).format('YYYY-MM-DD');
+    const dayOfMonth = index + 1;  // Ensure dayOfMonth is defined
+    const date = dayjs(`${year}-${month}-${dayOfMonth}`).format("YYYY-MM-DD");
 
     return {
       date,
       dayOfMonth,
       isCurrentMonth: true,
-      events: getEventsForDay(date)
+      events: getEventsForDay(date),
     };
   });
 }
@@ -254,14 +201,16 @@ function createCurrentMonthDays(year, month) {
 // Function to create an array of previous month days
 function createPreviousMonthDays(year, month) {
   const firstDayOfTheMonthWeekday = dayjs(`${year}-${month}-01`).day();
-  const previousMonth = dayjs(`${year}-${month}-01`).subtract(1, 'month');
+  const previousMonth = dayjs(`${year}-${month}-01`).subtract(1, "month");
 
   const visibleDaysOfPreviousMonth = firstDayOfTheMonthWeekday ? firstDayOfTheMonthWeekday - 1 : 6;
-  const previousMonthFinalMonday = dayjs(`${year}-${month}-01`).subtract(visibleDaysOfPreviousMonth, 'day').date();
+  const previousMonthFinalMonday = dayjs(`${year}-${month}-01`).subtract(visibleDaysOfPreviousMonth, "day").date();
 
   return Array.from({ length: visibleDaysOfPreviousMonth }, (_, index) => {
     return {
-      date: dayjs(`${previousMonth.year()}-${previousMonth.month() + 1}-${previousMonthFinalMonday + index}`).format('YYYY-MM-DD'),
+      date: dayjs(`${previousMonth.year()}-${previousMonth.month() + 1}-${previousMonthFinalMonday + index}`).format(
+        "YYYY-MM-DD"
+      ),
       dayOfMonth: previousMonthFinalMonday + index,
       isCurrentMonth: false,
     };
@@ -270,19 +219,19 @@ function createPreviousMonthDays(year, month) {
 
 // Function to create an array of next month days
 function createNextMonthDays(year, month) {
-  const lastDayOfMonth = dayjs(`${year}-${month}-01`).endOf('month');
+  const lastDayOfMonth = dayjs(`${year}-${month}-01`).endOf("month");
   const lastDayOfMonthWeekday = lastDayOfMonth.day();
-  const nextMonth = dayjs(`${year}-${month}-01`).add(1, 'month');
+  const nextMonth = dayjs(`${year}-${month}-01`).add(1, "month");
 
   const visibleDaysOfNextMonth = lastDayOfMonthWeekday ? 7 - lastDayOfMonthWeekday : lastDayOfMonthWeekday;
 
   return Array.from({ length: visibleDaysOfNextMonth }, (_, index) => {
     return {
-      date: dayjs(`${nextMonth.year()}-${nextMonth.month() + 1}-${index + 1}`).format('YYYY-MM-DD'),
+      date: dayjs(`${nextMonth.year()}-${nextMonth.month() + 1}-${index + 1}`).format("YYYY-MM-DD"),
       dayOfMonth: index + 1,
       isCurrentMonth: false,
     };
   });
-}
+}}
 
 export default Calendar;
