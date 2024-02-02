@@ -93,7 +93,7 @@ const EventsForm: React.FC<EventsFormProps> = ({ updateCalendar }) => {
     }
   };
 
-  // Delete events
+  // Delete events 
   const handleDelete = (index) => {
     // Remove event from the list
     const updatedEvents = [...events.slice(0, index), ...events.slice(index + 1)];
