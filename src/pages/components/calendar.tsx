@@ -67,6 +67,12 @@ const Calendar = () => {
   const [previousMonthDays, setPreviousMonthDays] = useState([]);
   const [nextMonthDays, setNextMonthDays] = useState([]);
 
+  // fix separating observances and userevents
+  const [userEvents, setUserEvents] = useState([]);
+  const [observances, setObservances] = useState([]);
+
+  const [calendarUpdateCounter, setCalendarUpdateCounter] = useState(0);
+
   console.log("Calendar component rendered");
 
   // Ref for selected_month
@@ -85,6 +91,11 @@ const Calendar = () => {
     setSelectedMonth((prevMonth) => dayjs(prevMonth).add(1, "month"));
   }
 
+  // Function to update calendar
+  const updateCalendar = () => {
+    setCalendarUpdateCounter((prevCounter) => prevCounter + 1);
+  }
+
   // Effect to update selected_month text when selectedMonth changes
   useEffect(() => {
     selectedMonthRef.current.innerText = selectedMonth.format("MMMM YYYY");
@@ -101,13 +112,12 @@ const Calendar = () => {
     setPreviousMonthDays(createPreviousMonthDays(year, month));
     setNextMonthDays(createNextMonthDays(year, month));
 
-    // combine user events and obervances data
-    const allEventsData = [...observancesData, ...getEventsFromLocalStorage()];
-    setAllEvents(allEventsData);
+    // separate user events and obervances data
+    const userEventsData = getEventsFromLocalStorage();
+    setUserEvents(userEventsData);
+    setObservances(observancesData);
 
-    // Log the initial events data
-    console.log("Initial events data:", allEventsData);
-  }, [selectedMonth]);
+  }, [selectedMonth, calendarUpdateCounter]);
 
   // Effect to re-render the calendar when the state is updated
   useEffect(() => {
@@ -120,32 +130,46 @@ const Calendar = () => {
     setAllEvents(storedEventsData);
   }, []);
 
-  // Function to get events for a specific day
-  const getEventsForDay = (date) => {
-    // Combine user events and observances data
-    const events = [...allEvents, ...observancesData];
-
+  // Function to get user events for a specific day
+  const getUserEventsForDay = (date) => {
     // Filter events for the given date
-    return events.filter((event) => dayjs(event.date).isSame(date, "day"));
+    return userEvents.filter((event) => dayjs(event.date).isSame(date, "day"));
+  }
+
+  // Function to get observances for specific day
+  const getObservancesForDay = (date) => {
+    return observances.filter((observance) => dayjs(observance.data).isSame(date, "day"));
+  }
+
+  //Function to get all events for specific day
+  const getEventsForDay = (date) => {
+    // Get user-created events
+    const userEventsForDay = getUserEventsForDay(date);
+
+    //Get observances for day
+    const observancesForDay = getObservancesForDay(date);
+
+    // Combine user events and observances
+    return [...userEventsForDay, ...observancesForDay]
   }
 
   // Function to render the days of the month
-function renderDaysOfMonth() {
-  const allYearDays = [...previousMonthDays, ...currentMonthDays, ...nextMonthDays];
+  function renderDaysOfMonth() {
+    const allYearDays = [...previousMonthDays, ...currentMonthDays, ...nextMonthDays];
 
-  return allYearDays.map((day) => (
-    <Day
-      key={day.date}
-      date={day.date}
-      dayOfMonth={day.dayOfMonth}
-      isCurrentMonth={day.isCurrentMonth}
-      today={TODAY}
-      events={getEventsForDay(day.date)}
-      observancesData={observancesData}
-      allYearDays={allYearDays}
-    />
-  ));
-}
+    return allYearDays.map((day) => (
+      <Day
+        key={day.date}
+        date={day.date}
+        dayOfMonth={day.dayOfMonth}
+        isCurrentMonth={day.isCurrentMonth}
+        today={TODAY}
+        events={getEventsForDay(day.date)}
+        observancesData={observancesData}
+        allYearDays={allYearDays}
+      />
+    ));
+  }
 
   // JSX structure for the Calendar component
   return (
@@ -176,7 +200,7 @@ function renderDaysOfMonth() {
         </div>
       </div>
       <div id="form_container">
-        <EventsForm />
+        <EventsForm updateCalendar={updateCalendar}/>
       </div>
     </>
   );
