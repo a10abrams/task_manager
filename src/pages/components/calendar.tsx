@@ -90,6 +90,17 @@ const Calendar = () => {
     return [...userEventsForDay, ...observancesForDay]
   }, []);
 
+  // Function to get observances for specific day
+  const getObservancesForDay = (date) => {
+    return observances.filter((observance) => dayjs(observance.data).isSame(date, "day"));
+  }
+
+  // Function to get user events for a specific day
+  const getUserEventsForDay = (date) => {
+    // Filter events for the given date
+    return userEvents.filter((event) => dayjs(event.date).isSame(date, "day"));
+  }
+
   // Event handlers
   function handlePreviousMonthClick() {
     setSelectedMonth((prevMonth) => dayjs(prevMonth).subtract(1, "month"));
@@ -129,7 +140,7 @@ const Calendar = () => {
     setUserEvents(userEventsData);
     setObservances(observancesData);
 
-  }, [selectedMonth, calendarUpdateCounter, getEventsForDay]);
+  }, [selectedMonth, calendarUpdateCounter, getEventsForDay, getObservancesForDay, getUserEventsForDay]);
 
   // Effect to re-render the calendar when the state is updated
   useEffect(() => {
@@ -141,17 +152,6 @@ const Calendar = () => {
     const storedEventsData = getEventsFromLocalStorage();
     setAllEvents(storedEventsData);
   }, []);
-
-  // Function to get user events for a specific day
-  const getUserEventsForDay = (date) => {
-    // Filter events for the given date
-    return userEvents.filter((event) => dayjs(event.date).isSame(date, "day"));
-  }
-
-  // Function to get observances for specific day
-  const getObservancesForDay = (date) => {
-    return observances.filter((observance) => dayjs(observance.data).isSame(date, "day"));
-  }
 
   // Function to render the days of the month
   function renderDaysOfMonth() {
