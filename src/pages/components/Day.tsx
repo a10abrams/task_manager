@@ -42,8 +42,8 @@ const Day: React.FC<DayProps> = ({ date, dayOfMonth, isCurrentMonth, today, even
   // Determine content based on the conditions
   let content;
   if (hasUserEvents && isObservance && unicodeSymbolsMap[observanceId]) {
-    content = `${dayOfMonth} ${unicodeSymbolsMap[observanceId]} *`;// '*' for user-created events
-  } else if (hasUserEvents) {
+    content = `${dayOfMonth} ${unicodeSymbolsMap[observanceId]}`;
+  } else if (hasUserEvents && date !== today) {
     content = `${dayOfMonth} *`;
   } else if (isObservance && unicodeSymbolsMap[observanceId]) {
     content = `${dayOfMonth} ${unicodeSymbolsMap[observanceId]}`;
@@ -54,7 +54,7 @@ const Day: React.FC<DayProps> = ({ date, dayOfMonth, isCurrentMonth, today, even
   // Set CSS classes based on conditions
   const dayClasses = `day_grid ${!isCurrentMonth ? "not_current_day" : ""} ${
     date === today ? "today_calendar_day" : ""
-  } ${observanceId ? `observance_${observanceId}` : ''}`;
+  } ${observanceId ? `observance_${observanceId}` : ''} ${hasUserEvents ? 'user_events' : ''}`;
 
   return (
     <li className={dayClasses} data-date={date}>
