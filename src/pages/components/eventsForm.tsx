@@ -135,7 +135,10 @@ const EventsForm: React.FC<EventsFormProps> = ({ updateCalendar }) => {
               </thead>
               <tbody>
                 {/* Display events from localStorage as table rows */}
-                {events.map((event, index) => (
+                {events
+                  {/* `.sort` function sorts the events array based on date, and `diff` (from Day.js) compares them */}
+                  .sort((a, b) => dayjs(a.date).diff(dayjs(b.date)))
+                  .map((event, index) => (
                   <tr key={index}>
                     <td className="name_table_data">{event.name}</td>
                     <td className="date_table_data">{dayjs(event.date).format("MM/DD")}</td>
