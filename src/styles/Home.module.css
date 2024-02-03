@@ -1,8 +1,54 @@
 .main {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: grid;
   align-items: center;
-  padding: 6rem;
+  padding: 0rem 5rem 5rem 5rem;
   min-height: 100vh;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .content {
+    padding: 4rem;
+  }
+
+  .main {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .label_task_table {
+    padding: 1vh;
+  }
+
+  .calendar_container {
+    width: 319px !important;
+  }
+  
+}
+
+/* Tablet and Smaller Desktop */
+@media (min-width: 701px) and (max-width: 1120px) {
+  .grid {
+    grid-template-columns: repeat(2, 50%);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .vercelLogo {
+    filter: invert(1);
+  }
+
+  .logo {
+    filter: invert(1) drop-shadow(0 0 0.3rem #ffffff70);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
 }

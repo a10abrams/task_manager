@@ -12,15 +12,13 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Task Manager</title>
+        <title>Digital Planner</title>
         <meta name="description" content="Oragnize your daily, weekly, monthly tasks" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={`${styles.main} ${inter.className}`}>
         <Calendar/>
-        <div className={styles.description}>
-        </div>
       </main>
     </>
   )
