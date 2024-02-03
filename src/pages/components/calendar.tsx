@@ -78,6 +78,18 @@ const Calendar = () => {
   // Ref for selected_month
   const selectedMonthRef = useRef(null);
 
+  //Function to get all events for specific day -- hoisted to fix vercel error
+  const getEventsForDay = (date) => {
+    // Get user-created events
+    const userEventsForDay = getUserEventsForDay(date);
+  
+    //Get observances for day
+    const observancesForDay = getObservancesForDay(date);
+  
+    // Combine user events and observances
+    return [...userEventsForDay, ...observancesForDay]
+  }
+
   // Event handlers
   function handlePreviousMonthClick() {
     setSelectedMonth((prevMonth) => dayjs(prevMonth).subtract(1, "month"));
@@ -117,7 +129,7 @@ const Calendar = () => {
     setUserEvents(userEventsData);
     setObservances(observancesData);
 
-  }, [selectedMonth, calendarUpdateCounter]);
+  }, [selectedMonth, calendarUpdateCounter, getEventsForDay]);
 
   // Effect to re-render the calendar when the state is updated
   useEffect(() => {
@@ -139,18 +151,6 @@ const Calendar = () => {
   // Function to get observances for specific day
   const getObservancesForDay = (date) => {
     return observances.filter((observance) => dayjs(observance.data).isSame(date, "day"));
-  }
-
-  //Function to get all events for specific day
-  const getEventsForDay = (date) => {
-    // Get user-created events
-    const userEventsForDay = getUserEventsForDay(date);
-
-    //Get observances for day
-    const observancesForDay = getObservancesForDay(date);
-
-    // Combine user events and observances
-    return [...userEventsForDay, ...observancesForDay]
   }
 
   // Function to render the days of the month
