@@ -27,7 +27,7 @@ Make sure you have the following installed:
 3. Open your broswer and navigate to http://localhost:3000
 
 Screenshots showing expected behavior:
-<img src="https://github.com/a10abrams/task_manager/assets/108836278/ae2a6898-7418-4a4a-a522-05d07948199b" width: 300, height: 300/> <img src="https://github.com/a10abrams/task_manager/assets/108836278/002f878a-e300-4ff2-b302-064802b5db58" width: 300, height: 300/>
+<img src="https://github.com/a10abrams/task_manager/assets/108836278/ae2a6898-7418-4a4a-a522-05d07948199b" width="300", height="300"/> <img src="https://github.com/a10abrams/task_manager/assets/108836278/002f878a-e300-4ff2-b302-064802b5db58" width="300", height="300"/>
 
 ## Contributing
 If you'd like to contribute to this project, please follow these guidelines:
