@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import weekday from "dayjs/plugin/weekday";
 import weekOfYear from "dayjs/plugin/weekOfYear";
 import utc from "dayjs/plugin/utc";
@@ -78,8 +78,8 @@ const Calendar = () => {
   // Ref for selected_month
   const selectedMonthRef = useRef(null);
 
-  //Function to get all events for specific day -- hoisted to fix vercel error
-  const getEventsForDay = (date) => {
+  //Function to get all events for specific day; useCallback to fix re-rendering issue
+  const getEventsForDay = useCallback((date) => {
     // Get user-created events
     const userEventsForDay = getUserEventsForDay(date);
   
@@ -88,7 +88,7 @@ const Calendar = () => {
   
     // Combine user events and observances
     return [...userEventsForDay, ...observancesForDay]
-  }
+  }, []);
 
   // Event handlers
   function handlePreviousMonthClick() {
