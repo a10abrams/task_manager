@@ -1,5 +1,5 @@
 # Digital Planner
-## (a.k.a. task_manager)
+### (a.k.a. task_manager)
 
 A digital, minimalist task manager built with Next.js/React.
 
