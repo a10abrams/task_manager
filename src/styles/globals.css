@@ -69,17 +69,11 @@ body {
   overflow-x: hidden;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
   }
 }
-
 
 /* CALENDAR MODULE */
 
@@ -199,31 +193,52 @@ li.day_grid.not_current_day {
 
 #form_container {
   margin: auto;
-  padding-top: 3em;
-}
-
-.form_title {
-  margin-bottom: 2em;
+  grid-column: 2;
 }
 
 .task_table {
   margin: 1em;
-  border: 1px solid yellow;
+  border: 1px solid var(--accent-hex);
   overflow-y: auto;
 }
 
 .label_task_table {
-  padding: 2px;
+  padding: 2vh;
 }
 
 td {
   padding: 5px;
 }
 
+#buttons_edit_delete_container {
+  display: grid;
+}
+
+#edit_event_button {
+  padding: 0.5px;
+}
+
+#delete_event_button {
+  padding: 3px;
+  grid-column-start: 2;
+}
+
 .input_form_container {
   margin-top: 2em;
 }
 
+#input_form {
+  display: grid;
+  justify-content: center;
+}
 .form_field_container {
   margin-bottom: 1em;
+}
+
+#submit_container {
+  text-align: center;
+}
+
+.local_events_display {
+  display: grid;
 }
