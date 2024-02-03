@@ -93,7 +93,7 @@ const EventsForm: React.FC<EventsFormProps> = ({ updateCalendar }) => {
     }
   };
 
-  // Delete events 
+  // Delete events
   const handleDelete = (index) => {
     // Remove event from the list
     const updatedEvents = [...events.slice(0, index), ...events.slice(index + 1)];
@@ -123,7 +123,6 @@ const EventsForm: React.FC<EventsFormProps> = ({ updateCalendar }) => {
     <>
       <form id="form_container" onSubmit={handleFormSubmit}>
         <div className="local_events_display">
-          <div className="form_title">Tasks</div>
           <div className="task_table">
             <table>
               <thead>
@@ -136,15 +135,15 @@ const EventsForm: React.FC<EventsFormProps> = ({ updateCalendar }) => {
               <tbody>
                 {/* Display events from localStorage as table rows */}
                 {events
-                  .sort((a, b) => dayjs(a.date).diff(dayjs(b.date)))
-                  .map((event, index) => (
+                .sort((a, b) => dayjs(a.date).diff(dayjs(b.date)))
+                .map((event, index) => (
                   <tr key={index}>
                     <td className="name_table_data">{event.name}</td>
                     <td className="date_table_data">{dayjs(event.date).format("MM/DD")}</td>
                     <td className="description_table_data">{event.description}</td>
-                    <td>
-                      <button onClick={() => handleEdits(index)}>*pencil emoji*</button>
-                      <button onClick={() => handleDelete(index)}>X</button>
+                    <td id="buttons_edit_delete_container">
+                      <button id="edit_event_button" onClick={() => handleEdits(index)}>&#x1F589;</button>
+                      <button id="delete_event_button" onClick={() => handleDelete(index)}>X</button>
                     </td>
                   </tr>
                 ))}
@@ -168,7 +167,7 @@ const EventsForm: React.FC<EventsFormProps> = ({ updateCalendar }) => {
                 <textarea id="description_field" value={description} onChange={handleDescriptionChange} maxLength={250} />
               </div>
 
-              <div className="form_field_container">
+              <div className="form_field_container" id="submit_container">
                 <input type="submit" id="submit_button" value="Create event" />
               </div>
             </div>
