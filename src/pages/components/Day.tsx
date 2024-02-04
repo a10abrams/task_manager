@@ -31,7 +31,7 @@ const unicodeSymbolsMap = {
 
 const Day: React.FC<DayProps> = ({ date, dayOfMonth, isCurrentMonth, today, events, observancesData, allYearDays }) => {
   // Check if the day has any user-created events
-  const hasUserEvents = events.length > 0;
+  const hasUserEvents = events?.length > 0;
 
   // Check if the day is in observancesData
   const isObservance = observancesData.some((observance) => observance.date === date);
