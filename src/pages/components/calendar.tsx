@@ -90,16 +90,16 @@ const Calendar = () => {
     return [...userEventsForDay, ...observancesForDay]
   }, []);
 
-  // Function to get observances for specific day
-  const getObservancesForDay = (date) => {
+  // Function to get observances for specific day; wrapped in callback
+  const getObservancesForDay = useCallback((date: string) => {
     return observances.filter((observance) => dayjs(observance.data).isSame(date, "day"));
-  }
+  }, [observances]);
 
-  // Function to get user events for a specific day
-  const getUserEventsForDay = (date) => {
+  // Function to get user events for a specific day; wrapped in callback
+  const getUserEventsForDay = useCallback((date: string) => {
     // Filter events for the given date
     return userEvents.filter((event) => dayjs(event.date).isSame(date, "day"));
-  }
+  }, [userEvents])
 
   // Event handlers
   function handlePreviousMonthClick() {
@@ -131,7 +131,7 @@ const Calendar = () => {
     const month = selectedMonth.format("M");
 
     // Set the state for the current, previous, and next month days
-    setCurrentMonthDays(createCurrentMonthDays(year, month, getEventsForDay));
+    setCurrentMonthDays(createCurrentMonthDays(year, month, getObservancesForDay, getUserEventsForDay));
     setPreviousMonthDays(createPreviousMonthDays(year, month));
     setNextMonthDays(createNextMonthDays(year, month));
 
@@ -206,7 +206,8 @@ const Calendar = () => {
   );
 
 // Function to create an array of current month days -- updated to be dynamically rendered
-function createCurrentMonthDays(year, month, getEventsForDay) {
+// Updated again to include correct arg # and types
+function createCurrentMonthDays(year: string, month: string, getObservancesForDay: Function, getUserEventsForDay: Function) {
   const numberOfDaysInMonth = dayjs(`${year}-${month}-01`).daysInMonth();
 
   return Array.from({ length: numberOfDaysInMonth }, (_, index) => {
