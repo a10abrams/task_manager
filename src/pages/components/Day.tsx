@@ -41,14 +41,19 @@ const Day: React.FC<DayProps> = ({ date, dayOfMonth, isCurrentMonth, today, even
 
   // Determine content based on the conditions
   let content;
-  if (hasUserEvents && isObservance && unicodeSymbolsMap[observanceId]) {
-    content = `${dayOfMonth} ${unicodeSymbolsMap[observanceId]}`;
-  } else if (hasUserEvents && date !== today) {
-    content = `${dayOfMonth} *`;
-  } else if (isObservance && unicodeSymbolsMap[observanceId]) {
-    content = `${dayOfMonth} ${unicodeSymbolsMap[observanceId]}`;
+  if (dayOfMonth !== undefined) {
+    if (hasUserEvents && isObservance && unicodeSymbolsMap[observanceId]) {
+      content = `${dayOfMonth} ${unicodeSymbolsMap[observanceId]}`;
+    } else if (hasUserEvents && date !== today) {
+      content = `${dayOfMonth} *`;
+    } else if (isObservance && unicodeSymbolsMap[observanceId]) {
+      content = `${dayOfMonth} ${unicodeSymbolsMap[observanceId]}`;
+    } else {
+      content = dayOfMonth.toString();
+    }
   } else {
-    content = dayOfMonth.toString();
+    // dayOfMonth is undefined message
+    content = "Undefined Day";
   }
 
   // Set CSS classes based on conditions
