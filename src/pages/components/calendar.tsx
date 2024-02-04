@@ -99,7 +99,7 @@ const Calendar = () => {
   const getUserEventsForDay = useCallback((date: string) => {
     // Filter events for the given date
     return userEvents.filter((event) => dayjs(event.date).isSame(date, "day"));
-  }, [userEvents])
+  }, [observances, userEvents])
 
   // Event handlers
   function handlePreviousMonthClick() {
@@ -140,7 +140,7 @@ const Calendar = () => {
     setUserEvents(userEventsData);
     setObservances(observancesData);
 
-  }, [selectedMonth, calendarUpdateCounter, getEventsForDay, getObservancesForDay, getUserEventsForDay]);
+  }, [selectedMonth, calendarUpdateCounter, createCurrentMonthDays, getEventsForDay, getObservancesForDay, getUserEventsForDay]);
 
   // Effect to re-render the calendar when the state is updated
   useEffect(() => {
