@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import dayjs from 'dayjs'
-import { getEventsFromLocalStorage } from '../utilities/localStorageUtils';
+import { getEventsFromLocalStorage } from '../../utilities/localStorageUtils';
 
 // Define prop type
 interface EventsFormProps {
