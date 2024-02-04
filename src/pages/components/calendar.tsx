@@ -78,8 +78,8 @@ const Calendar = () => {
   // Ref for selected_month
   const selectedMonthRef = useRef(null);
 
-  //Function to get all events for specific day; useCallback to fix re-rendering issue
-  const getEventsForDay = useCallback((date) => {
+  //Function to get all events for specific day
+  const getEventsForDay = (date) => {
     // Get user-created events
     const userEventsForDay = getUserEventsForDay(date);
   
