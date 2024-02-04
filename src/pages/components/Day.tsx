@@ -33,8 +33,8 @@ const Day: React.FC<DayProps> = ({ date, dayOfMonth, isCurrentMonth, today, even
   // Check if the day has any user-created events
   const hasUserEvents = events?.length > 0;
 
-  // Check if the day is in observancesData
-  const isObservance = observancesData.some((observance) => observance.date === date);
+  // Check if the day is in observancesData; added optional chaning (if `obsData` is undefined, proceed with `some`)
+  const isObservance = observancesData?.some((observance) => observance.date === date);
 
   // Get the id of the observance
   const observanceId = isObservance ? observancesData.find((observance) => observance.date === date).id : '';
