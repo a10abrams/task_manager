@@ -88,7 +88,7 @@ const Calendar = () => {
   
     // Combine user events and observances
     return [...userEventsForDay, ...observancesForDay]
-  }, []);
+  };
 
   // Function to get observances for specific day; wrapped in callback
   const getObservancesForDay = useCallback((date: string) => {
