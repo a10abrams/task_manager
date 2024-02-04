@@ -5,7 +5,7 @@ import weekOfYear from "dayjs/plugin/weekOfYear";
 import utc from "dayjs/plugin/utc";
 import arraySupport from "dayjs/plugin/arraySupport";
 import EventsForm from "./eventsForm";
-import { getEventsFromLocalStorage } from "../utilities/localStorageUtils";
+import { getEventsFromLocalStorage } from "../../utilities/localStorageUtils";
 import Day from "./Day";
 
 // Extending dayjs with required plugins
