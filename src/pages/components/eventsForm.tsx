@@ -78,7 +78,7 @@ const EventsForm: React.FC<EventsFormProps> = ({ updateCalendar }) => {
     setDescription('');
   };
 
-  // This simplified (no more stringify) function directly recieves the events array
+  // This simplified function directly recieves the events array
   // Now, it should ensure that the data being saved to localStorage is serializable--name, date, and description
   const saveEventsToLocalStorage = (events: Event[], updateCalendar: () => void) => {
     // Extract only necessary properties
